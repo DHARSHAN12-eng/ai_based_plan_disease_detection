@@ -1,0 +1,232 @@
+{% extends 'detection/base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero">
+    <div class="hero-badge">
+        <span class="dot"></span>
+        AI-Powered Analysis
+    </div>
+    <h1>Plant Disease Detection</h1>
+    <p class="hero-subtitle">Upload a leaf image to instantly detect potential diseases using our advanced image analysis engine.</p>
+</div>
+
+<!-- Upload Card -->
+<div class="glass-card" style="max-width: 620px; margin: 0 auto 3rem;" id="upload-card">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--glass-border);">
+        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📤</div>
+        <div>
+            <h3 style="margin: 0;">Upload Leaf Image</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">JPG, PNG — max 10MB</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="upload-form">
+        {% csrf_token %}
+
+        <!-- Drag & Drop Zone -->
+        <div id="drop-zone" style="
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
+        ">
+            <div id="drop-content">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.7;">🌿</div>
+                <p style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    Drag & drop your leaf image here
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">or click to browse files</p>
+            </div>
+
+            <!-- Preview (hidden by default) -->
+            <div id="preview-container" style="display: none;">
+                <img id="preview-image" style="max-width: 100%; max-height: 280px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);" alt="Preview">
+                <p id="file-name" style="color: var(--primary-light); font-weight: 500; margin-top: 1rem; font-size: 0.9rem;"></p>
+                <button type="button" id="remove-file" style="
+                    margin-top: 0.75rem;
+                    background: rgba(239, 68, 68, 0.15);
+                    border: 1px solid rgba(239, 68, 68, 0.3);
+                    color: #fca5a5;
+                    padding: 6px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                    font-family: inherit;
+                    transition: var(--transition);
+                ">✕ Remove</button>
+            </div>
+
+            <input type="file" name="image" id="file-input" accept="image/*"
+                style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+        </div>
+
+        <!-- Tip -->
+        <div style="
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-xs);
+            margin-top: 1.25rem;
+            font-size: 0.85rem;
+            color: #6ee7b7;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        ">
+            <span style="flex-shrink: 0;">💡</span>
+            <span>Ensure the leaf is well-lit and centered in the frame for the most accurate results.</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="analyze-btn" style="margin-top: 1.5rem;">
+            <span id="btn-text">🔬 Analyze Leaf</span>
+            <span id="btn-loading" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite;">
+                    <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                Analyzing...
+            </span>
+        </button>
+    </form>
+</div>
+
+<!-- How It Works Section -->
+<div style="max-width: 900px; margin: 0 auto 3rem;">
+    <h2 style="text-align: center; margin-bottom: 2rem;">How It Works</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+        <div class="glass-card" style="text-align: center; padding: 1.75rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📸</div>
+            <h3 style="margin-bottom: 0.5rem;">1. Upload</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Take a clear photo of the affected leaf and upload it to our platform.</p>
+        </div>
+        <div class="glass-card" style="text-align: center; padding: 1.75rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🤖</div>
+            <h3 style="margin-bottom: 0.5rem;">2. Analyze</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Our AI examines color patterns, spots, and discoloration to identify diseases.</p>
+        </div>
+        <div class="glass-card" style="text-align: center; padding: 1.75rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">💊</div>
+            <h3 style="margin-bottom: 0.5rem;">3. Treat</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Get detailed treatment recommendations and prevention strategies.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="glass-card-static" style="max-width: 900px; margin: 0 auto 2rem; padding: 1.5rem 2rem;">
+    <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 1rem; text-align: center;">
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-light);">6+</div>
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Disease Types</div>
+        </div>
+        <div style="width: 1px; background: var(--glass-border); align-self: stretch;"></div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-light);">95%</div>
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Accuracy Rate</div>
+        </div>
+        <div style="width: 1px; background: var(--glass-border); align-self: stretch;"></div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-light);">&lt;2s</div>
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Analysis Time</div>
+        </div>
+        <div style="width: 1px; background: var(--glass-border); align-self: stretch;"></div>
+        <div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-light);">Free</div>
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">No Cost</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    #drop-zone.drag-over {
+        border-color: var(--primary-light) !important;
+        background: rgba(16, 185, 129, 0.08) !important;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+    }
+
+    #drop-zone:hover {
+        border-color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    #remove-file:hover {
+        background: rgba(239, 68, 68, 0.25) !important;
+    }
+</style>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const dropContent = document.getElementById('drop-content');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImage = document.getElementById('preview-image');
+    const fileName = document.getElementById('file-name');
+    const removeBtn = document.getElementById('remove-file');
+    const uploadForm = document.getElementById('upload-form');
+    const btnText = document.getElementById('btn-text');
+    const btnLoading = document.getElementById('btn-loading');
+
+    // Drag and drop events
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+        });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            showPreview(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            showPreview(e.target.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            fileName.textContent = file.name;
+            dropContent.style.display = 'none';
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.value = '';
+        dropContent.style.display = 'block';
+        previewContainer.style.display = 'none';
+    });
+
+    uploadForm.addEventListener('submit', () => {
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline-flex';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'detection/base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: calc(80vh - 100px);">
+    <div class="glass-card" style="max-width: 480px; width: 100%; animation: fadeInUp 0.6s ease-out;" id="signup-card">
+
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="
+                width: 64px;
+                height: 64px;
+                background: linear-gradient(135deg, var(--primary), var(--accent));
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                margin: 0 auto 1.25rem;
+                box-shadow: 0 8px 30px rgba(245, 158, 11, 0.2);
+            ">🌱</div>
+            <h2 style="margin-bottom: 0.5rem;">Create an Account</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Join PlantGuard AI and start protecting your crops.</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" id="signup-form">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+
+                {% if field.help_text %}
+                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; line-height: 1.5;">
+                    {{ field.help_text|safe }}
+                </p>
+                {% endif %}
+
+                {% for error in field.errors %}
+                <p style="color: #fca5a5; font-size: 0.8rem; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                    ⚠️ {{ error }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="signup-btn" style="margin-top: 0.5rem;">
+                Create Account →
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">or</div>
+
+        <!-- Login Link -->
+        <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+            Already have an account?
+            <a href="{% url 'login' %}" style="color: var(--primary-light); text-decoration: none; font-weight: 600;" id="login-link"
+               onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                Sign in →
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

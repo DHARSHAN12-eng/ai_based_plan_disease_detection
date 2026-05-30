@@ -1,0 +1,233 @@
+{% extends 'detection/base.html' %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+
+    <!-- Header -->
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem;">
+        <a href="{% url 'home' %}" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: var(--transition);"
+           onmouseover="this.style.color='var(--primary-light)'" onmouseout="this.style.color='var(--text-muted)'">
+            ← Back to Analyze
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+
+        <!-- Left: Image -->
+        <div class="glass-card" style="animation: slideInLeft 0.6s ease-out;" id="image-card">
+            {% if uploaded_image %}
+            <div style="position: relative; border-radius: 12px; overflow: hidden;">
+                <img src="{{ uploaded_image.image.url }}" alt="Analyzed Leaf"
+                    style="width: 100%; height: auto; display: block; border-radius: 12px;">
+
+                <!-- Status Badge on Image -->
+                <div style="
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    background: rgba(0,0,0,0.6);
+                    backdrop-filter: blur(10px);
+                    padding: 6px 14px;
+                    border-radius: 50px;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: {{ severity_color }};
+                    border: 1px solid {{ severity_color }}33;
+                " id="status-badge">
+                    {{ disease_icon }} {{ uploaded_image.prediction }}
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">
+                    📅 {{ uploaded_image.uploaded_at|date:"M d, Y • H:i" }}
+                </span>
+                <span style="
+                    background: {{ severity_color }}18;
+                    color: {{ severity_color }};
+                    padding: 4px 12px;
+                    border-radius: 50px;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    border: 1px solid {{ severity_color }}33;
+                ">{{ severity }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right: Analysis Results -->
+        <div style="animation: slideInRight 0.6s ease-out;">
+
+            <!-- Main Result Card -->
+            <div class="glass-card" style="margin-bottom: 1.25rem;" id="result-card">
+                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">{{ disease_icon }}</span>
+                    Analysis Report
+                </h2>
+
+                <!-- Disease Name -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Detected Condition</div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: {{ severity_color }}; letter-spacing: -0.02em;" id="disease-name">
+                        {{ uploaded_image.prediction }}
+                    </div>
+                </div>
+
+                <!-- Confidence Bar -->
+                <div style="margin-bottom: 1.5rem;" id="confidence-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Confidence</span>
+                        <span style="font-weight: 700; color: {{ severity_color }}; font-size: 1.1rem;" id="confidence-value">0%</span>
+                    </div>
+                    <div style="
+                        width: 100%;
+                        height: 10px;
+                        background: rgba(255,255,255,0.06);
+                        border-radius: 10px;
+                        overflow: hidden;
+                    ">
+                        <div id="confidence-bar" style="
+                            width: 0%;
+                            height: 100%;
+                            background: linear-gradient(90deg, {{ severity_color }}, {{ severity_color }}cc);
+                            border-radius: 10px;
+                            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+                            box-shadow: 0 0 15px {{ severity_color }}44;
+                        "></div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div style="
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--radius-sm);
+                    padding: 1rem 1.25rem;
+                    line-height: 1.7;
+                    color: var(--text-secondary);
+                    font-size: 0.9rem;
+                ">
+                    {{ disease_description }}
+                </div>
+            </div>
+
+            <!-- Recommendations Card -->
+            <div class="glass-card" id="recommendations-card">
+                <h3 style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                    💊 Treatment Recommendations
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for rec in recommendations %}
+                    <div style="
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 12px;
+                        padding: 12px 14px;
+                        background: rgba(255,255,255,0.03);
+                        border: 1px solid var(--glass-border);
+                        border-radius: var(--radius-xs);
+                        transition: var(--transition);
+                        animation: fadeInUp 0.5s ease-out {{ forloop.counter0 }}00ms both;
+                    " class="rec-item"
+                       onmouseover="this.style.borderColor='var(--glass-border-hover)'; this.style.background='rgba(255,255,255,0.06)'"
+                       onmouseout="this.style.borderColor='var(--glass-border)'; this.style.background='rgba(255,255,255,0.03)'">
+                        <span style="
+                            flex-shrink: 0;
+                            width: 24px;
+                            height: 24px;
+                            background: {{ severity_color }}18;
+                            color: {{ severity_color }};
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 0.7rem;
+                            font-weight: 700;
+                        ">{{ forloop.counter }}</span>
+                        <span style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5;">{{ rec }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Color Analysis Card -->
+    {% if analysis %}
+    <div class="glass-card" style="margin-top: 1.5rem; animation: fadeInUp 0.8s ease-out 0.3s both;" id="analysis-card">
+        <h3 style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
+            📊 Color Analysis Breakdown
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: rgba(16, 185, 129, 0.08); border-radius: var(--radius-sm); border: 1px solid rgba(16, 185, 129, 0.15);">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">{{ analysis.green_percentage }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">Green</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(180, 120, 60, 0.08); border-radius: var(--radius-sm); border: 1px solid rgba(180, 120, 60, 0.15);">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #b4783c;">{{ analysis.brown_percentage }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">Brown</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(245, 158, 11, 0.08); border-radius: var(--radius-sm); border: 1px solid rgba(245, 158, 11, 0.15);">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">{{ analysis.yellow_percentage }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">Yellow</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-sm); border: 1px solid var(--glass-border);">
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-secondary);">{{ analysis.white_percentage }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">White</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(139, 92, 246, 0.08); border-radius: var(--radius-sm); border: 1px solid rgba(139, 92, 246, 0.15);">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #8b5cf6;">{{ analysis.color_variance }}</div>
+                <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">Variance</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'home' %}" class="btn btn-primary btn-lg" id="analyze-another-btn">
+            🔬 Analyze Another Image
+        </a>
+        <a href="{% url 'history' %}" class="btn btn-secondary btn-lg" id="view-history-btn">
+            📋 View History
+        </a>
+    </div>
+</div>
+
+<!-- Animated Confidence Bar Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const confidence = {{ confidence }};
+        const bar = document.getElementById('confidence-bar');
+        const value = document.getElementById('confidence-value');
+
+        // Animate after a small delay
+        setTimeout(() => {
+            bar.style.width = confidence + '%';
+
+            // Count up animation
+            let current = 0;
+            const step = confidence / 40;
+            const interval = setInterval(() => {
+                current += step;
+                if (current >= confidence) {
+                    current = confidence;
+                    clearInterval(interval);
+                }
+                value.textContent = Math.round(current) + '%';
+            }, 25);
+        }, 300);
+    });
+</script>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}
